@@ -1,9 +1,9 @@
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Date;
 
 import PdfBuilder.Builders.Implementations.iTextPdfBuilder;
 import PdfBuilder.Models.Invoice;
-
 
 public class Main {
 
@@ -14,24 +14,39 @@ public class Main {
     public void CreatePdfDocument() throws FileNotFoundException {
         Invoice invoice = MockInvoiceGenerator.Generate();
 
-        new iTextPdfBuilder(getFilePath(), getFileName())
-            .AddParagraph(invoice.personalInformation.toString())
-            .AddWhiteline()
-            .AddParagraph(invoice.supplierInformation.toString())
-            .AddWhiteline()
-            .AddVehiclesTables(invoice.vehicleInvoices)
-            .Build();
+        try {
+            new iTextPdfBuilder(getFilePath(), getFileName())
+                    .AddTextboxParagraph(invoice.supplierInformation.toString(), 350, 610, 200)
+                    .AddTitleImage()
+                        .AddWhiteline()
+                        .AddWhiteline()
+                        .AddWhiteline()
+                        .AddWhiteline()
+                        .AddWhiteline()
+                    .AddWhiteline().AddParagraph(invoice.personalInformation.toString())
+                        .AddWhiteline()
+                        .AddWhiteline()
+                    .AddInvoiceTitle("Factuur")
+                    .AddInvoiceInformation(invoice)
+                        .AddWhiteline()
+                    .AddVehiclesTables(invoice.vehicleInvoices)
+                .Build();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         
         System.out.println("Pdf created");
     }
 
     private String getFilePath(){
-        return "/home/reinoud/Downloads/pdfpoc/output";
+        // Linux
+        //return "/home/reinoud/Downloads/pdfpoc/output";
+        // Windows 
+        return "c:/repos/PDF-demo/output";
     }
 
     private String getFileName(){
-        long datetime = new Date().getTime();
-        return "sample_" + datetime;
+        return "sample_" + new Date().getTime();
     }
 
 }

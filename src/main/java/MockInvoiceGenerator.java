@@ -17,7 +17,7 @@ public class MockInvoiceGenerator {
 
     public static Invoice Generate(){
         String invoiceNumber = "20190300000123";
-        Date invoiceDate = new Date(2019, 04, 02);
+        Date invoiceDate = new Date(119, 04, 02);
         Invoice invoice = new Invoice(invoiceNumber, invoiceDate, GeneratePersonalInformation(), GenerateSupplierInformation(), GenerateVehicleInvoices());
         return invoice;
     }
@@ -33,12 +33,12 @@ public class MockInvoiceGenerator {
     private static RegionalInvoice GenerateRegionalInvoice(){
         List<RegionalInvoiceLine> regionalInvoiceLines = new ArrayList<RegionalInvoiceLine>();
         
-        regionalInvoiceLines.add(new RegionalInvoiceLine("Tilburg", new Date(2019, 03, 01, 8, 42), 4.95, 4.95));
-        regionalInvoiceLines.add(new RegionalInvoiceLine("Eindhoven", new Date(2019, 03, 01, 12, 01), 7.95, 7.95));
-        regionalInvoiceLines.add(new RegionalInvoiceLine("Tilburg", new Date(2019, 03, 01, 17, 51), 4.95, 0));
-        regionalInvoiceLines.add(new RegionalInvoiceLine("Tilburg", new Date(2019, 03, 02, 8, 32), 4.95, 4.95));
-        regionalInvoiceLines.add(new RegionalInvoiceLine("Den Bosch", new Date(2019, 03, 02, 9, 26), 8.95, 8.95));
-        regionalInvoiceLines.add(new RegionalInvoiceLine("Den Bosch", new Date(2019, 03, 02, 19, 26), 8.95, 0));
+        regionalInvoiceLines.add(new RegionalInvoiceLine("Tilburg", new Date(119, 03, 01, 8, 42), 4.95, 4.95));
+        regionalInvoiceLines.add(new RegionalInvoiceLine("Eindhoven", new Date(119, 03, 01, 12, 01), 7.95, 7.95));
+        regionalInvoiceLines.add(new RegionalInvoiceLine("Tilburg", new Date(119, 03, 01, 17, 51), 4.95, 0));
+        regionalInvoiceLines.add(new RegionalInvoiceLine("Tilburg", new Date(119, 03, 02, 8, 32), 4.95, 4.95));
+        regionalInvoiceLines.add(new RegionalInvoiceLine("Den Bosch", new Date(119, 03, 02, 9, 26), 8.95, 8.95));
+        regionalInvoiceLines.add(new RegionalInvoiceLine("Den Bosch", new Date(119, 03, 02, 19, 26), 8.95, 0));
 
         Double totalprice = 123456.20;
 
