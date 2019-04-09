@@ -1,16 +1,31 @@
 package PdfBuilder.Models;
 
-public class KilometerInvoiceLine {
-    public  RoadType RoadType;
-    public  double DrivenDistance;
-    public  double PricePerKilometerBeforeTaxes;
-    public  double AccountedPriceBeforeTaxes;
+import java.math.BigDecimal;
+import java.math.MathContext;
 
-    public KilometerInvoiceLine(RoadType RoadType, double DrivenDistance, double PricePerKilometerBeforeTaxes) {
+public class KilometerInvoiceLine {
+    public RoadType RoadType;
+    public int DrivenDistanceInMeters;
+    public BigDecimal PricePerKilometerBeforeTaxes;
+    public BigDecimal AccountedPriceBeforeTaxes;
+
+    public KilometerInvoiceLine(RoadType RoadType, int DrivenDistance, BigDecimal PricePerKilometerBeforeTaxes) {
         this.RoadType = RoadType;
-        this.DrivenDistance = DrivenDistance;
+        this.DrivenDistanceInMeters = DrivenDistance;
         this.PricePerKilometerBeforeTaxes = PricePerKilometerBeforeTaxes;
-        
-        this.AccountedPriceBeforeTaxes = this.DrivenDistance * this.PricePerKilometerBeforeTaxes;
+
+        this.AccountedPriceBeforeTaxes = this.calculatePriceBeforeTaxes();
+    }
+
+    public BigDecimal calculatePriceBeforeTaxes() {
+        return this.PricePerKilometerBeforeTaxes
+            .multiply(new BigDecimal(this.DrivenDistanceInMeters))
+            .divide(new BigDecimal(1000))
+            .round(new MathContext(2));
+    }
+
+    public BigDecimal getDrivenDistanceInKilometers() {
+        return new BigDecimal(this.DrivenDistanceInMeters)
+            .divide(new BigDecimal(1000));
     }
 }

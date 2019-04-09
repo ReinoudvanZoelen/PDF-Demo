@@ -1,5 +1,7 @@
 package PdfBuilder.Models;
 
+import java.math.BigDecimal;
+
 public class VehicleInvoice {
     public  String DisplayName;
     public  String LicensePlate;
@@ -13,4 +15,9 @@ public class VehicleInvoice {
         this.RegionalInvoice = RegionalInvoice;
         this.KilometerInvoice = KilometerInvoice;
     }
+
+	public BigDecimal calculatePriceBeforeTaxes() {
+        return this.RegionalInvoice.calculatePriceBeforeTaxes()
+        .add(this.KilometerInvoice.calculatePriceBeforeTaxes());
+	}
 }

@@ -23,13 +23,18 @@ public class Main {
                         .AddWhiteline()
                         .AddWhiteline()
                         .AddWhiteline()
-                    .AddWhiteline().AddParagraph(invoice.personalInformation.toString())
+                        .AddWhiteline()
+                    .AddParagraph(invoice.personalInformation.toString())
                         .AddWhiteline()
                         .AddWhiteline()
-                    .AddInvoiceTitle("Factuur")
+                    .AddChapterTitle("Factuur")
                     .AddInvoiceInformation(invoice)
                         .AddWhiteline()
                     .AddVehiclesTables(invoice.vehicleInvoices)
+                    .AddChapterTitle("Totaal")
+                    .AddTotalsTable(invoice)
+                        .AddWhiteline()
+                    .AddDisclaimer(invoice.calculatePriceAfterTaxes())
                 .Build();
         } catch (IOException e) {
             e.printStackTrace();

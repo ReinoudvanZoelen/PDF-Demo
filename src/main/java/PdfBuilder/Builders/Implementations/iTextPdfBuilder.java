@@ -1,23 +1,21 @@
 package PdfBuilder.Builders.Implementations;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import com.itextpdf.io.font.FontConstants;
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.color.Color;
-import com.itextpdf.kernel.font.PdfFont;
-import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.border.SolidBorder;
+import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
@@ -85,9 +83,15 @@ public class iTextPdfBuilder {
         return this;
     }
 
+    public iTextPdfBuilder AddPagebreak() {
+        document.add(new AreaBreak());
+        return this;
+    }
+
     public iTextPdfBuilder AddVehiclesTables(List<VehicleInvoice> vehicleInvoices) {
         for (VehicleInvoice vehicleInvoice : vehicleInvoices) {
             this.AddVehicleTable(vehicleInvoice);
+            this.AddPagebreak();
         }
 
         return this;
@@ -139,15 +143,15 @@ public class iTextPdfBuilder {
 
         // Headers
         table.addCell(new Cell().add("Wegtype").setBold());
-        table.addCell(new Cell().add("Afstand (in meter)").setBold());
+        table.addCell(new Cell().add("Afstand (in kilometer)").setBold());
         table.addCell(new Cell().add("Prijs per kilometer").setBold());
         table.addCell(new Cell().add("Prijs ex. btw").setBold());
 
         // Content
         for (KilometerInvoiceLine kilometerInvoiceLine : kilometerInvoice.KilometerInvoiceLines) {
             table.addCell(kilometerInvoiceLine.RoadType.toString());
-            table.addCell(Double.toString(kilometerInvoiceLine.DrivenDistance));
-            table.addCell(this.createCurrencyCell(kilometerInvoiceLine.PricePerKilometerBeforeTaxes));
+            table.addCell(kilometerInvoiceLine.getDrivenDistanceInKilometers().toString());
+            table.addCell(this.createCurrencyCell(kilometerInvoiceLine.PricePerKilometerBeforeTaxes, 8));
             table.addCell(this.createCurrencyCell(kilometerInvoiceLine.AccountedPriceBeforeTaxes));
         }
 
@@ -164,9 +168,7 @@ public class iTextPdfBuilder {
         document.close();
     }
 
-    public iTextPdfBuilder AddInvoiceTitle(String text) throws IOException {
-        PdfFont font = PdfFontFactory.createFont(FontConstants.COURIER);
-
+    public iTextPdfBuilder AddChapterTitle(String text) {
         Text styledText = new Text(text).addStyle(ITextPdfStyler.GetStyle(ITextStyle.H1));
         Paragraph paragraph = new Paragraph(styledText);
 
@@ -188,8 +190,64 @@ public class iTextPdfBuilder {
         return this;
     }
 
-    private Cell createCurrencyCell(double value) {
+    public iTextPdfBuilder AddTotalsTable(Invoice invoice) {
+        float[] pointColumnWidths = { 200F, 200F, 200F };
+        Table table = new Table(pointColumnWidths);
+
+        // Titles
+        table.addCell(new Cell().add("Voertuig").setBold());
+        table.addCell(new Cell().add("Kentekenplaat").setBold());
+        table.addCell(new Cell().add("Totaal").setBold());
+
+        // Car line
+        for (VehicleInvoice vehicleInvoice : invoice.vehicleInvoices) {
+            table.addCell(vehicleInvoice.DisplayName);
+            table.addCell(vehicleInvoice.LicensePlate);
+            table.addCell(new Cell().add(this.createCurrencyCell(vehicleInvoice.calculatePriceBeforeTaxes())));
+        }
+
+        // Whiteline
+        table.addCell("");
+        table.addCell("");
+        table.addCell("");
+
+        // Subtotals
+        table.addCell("");
+        table.addCell("Subtotaal");
+        table.addCell(new Cell().add(this.createCurrencyCell(invoice.calculatePriceBeforeTaxes())));
+
+        // Taxes
+        table.addCell("");
+        table.addCell("21,00% BTW");
+        table.addCell(new Cell().add(this.createCurrencyCell(invoice.calculateTaxes())));
+
+        // Totals
+        table.addCell("");
+        table.addCell(new Cell().add("Totaal").setBold());
+        table.addCell(new Cell().add(this.createCurrencyCell(invoice.calculatePriceAfterTaxes())).setBold());
+
+        this.document.add(table);
+
+        return this;
+    }
+
+    public iTextPdfBuilder AddDisclaimer(BigDecimal calculatePriceAfterTaxes) {
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
+        formatter.setMaximumFractionDigits(2);
+        String moneyString = formatter.format(calculatePriceAfterTaxes);
+
+        return this.AddParagraph("Wij verzoeken u vriendelijk om het bovenstaande bedrag van " + moneyString
+                        + "  op onze bankrekening te voldoen, onder vermelding van het factuurnummer 20190300000123.");
+    }
+
+    // #region Helpers
+    private Cell createCurrencyCell(BigDecimal value) {
+        return this.createCurrencyCell(value, 2);
+    }
+
+    private Cell createCurrencyCell(BigDecimal value, int precision) {
+        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+        formatter.setMaximumFractionDigits(precision);
         String moneyString = formatter.format(value);
 
         Cell cell = new Cell().add(moneyString).setTextAlignment(TextAlignment.RIGHT);
@@ -201,4 +259,5 @@ public class iTextPdfBuilder {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         return format.format(date);
     }
+    // #region
 }
